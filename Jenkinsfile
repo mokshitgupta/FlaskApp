@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Ensure Jenkins can find docker executable (update path if needed)
         PATH = "/usr/local/bin:${env.PATH}"
         DOCKER_IMAGE = "mokshitgupta29/flaskapp:latest"
     }
@@ -40,7 +39,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploy stage — customize as needed'
-                // You can add your deployment steps here
             }
         }
     }
