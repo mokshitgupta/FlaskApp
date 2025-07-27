@@ -2,13 +2,20 @@ pipeline {
     agent any
 
     environment {
+        PATH = "/usr/local/bin:${env.PATH}"
         IMAGE_NAME = 'flaskapp:latest'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/mokshitgupta/FlaskApp.git'
+                git 'https://github.com/mokshitgupta/FlaskApp.git'
+            }
+        }
+        stage('Verify Docker') {
+            steps {
+                sh 'which docker'
+                sh 'docker --version'
             }
         }
         stage('Build Docker Image') {
