@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/usr/local/bin:${env.PATH}" 
-        IMAGE_NAME = 'mokshitgupta29/flaskapp:latest'  // Docker Hub repo + image name
-        DOCKER_CREDENTIALS_ID = '2c498829-1aa7-4c9f-802d-d9ffc999dd7f' // Jenkins credentials ID for Docker Hub
+        PATH = "/usr/local/bin:${env.PATH}"
+        IMAGE_NAME = 'mokshitgupta29/flaskapp:latest'
+        DOCKER_CREDENTIALS_ID = '2c498829-1aa7-4c9f-802d-d9ffc999dd7f' // Replace with your actual ID
     }
 
     stages {
@@ -23,10 +23,8 @@ pipeline {
 
         stage('Docker Login & Push') {
             steps {
-                script {
-                    docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
-                        sh "docker push ${IMAGE_NAME}"
-                    }
+                withDockerRegistry(credentialsId: "${DOCKER_CREDENTIALS_ID}", url: '') {
+                    sh "docker push ${IMAGE_NAME}"
                 }
             }
         }
