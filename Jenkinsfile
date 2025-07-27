@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
+        // Ensure Jenkins can find docker executable (update path if needed)
+        PATH = "/usr/local/bin:${env.PATH}"
         DOCKER_IMAGE = "mokshitgupta29/flaskapp:latest"
-        DOCKER_REGISTRY = "https://index.docker.io/v1/"
-        DOCKER_CREDENTIALS_ID = "2c498829-1aa7-4c9f-802d-d9ffc999dd7f" // your Docker Hub credential ID
     }
 
     stages {
@@ -16,13 +16,8 @@ pipeline {
 
         stage('Verify Docker') {
             steps {
-                script {
-                    def dockerPath = sh(script: 'which docker', returnStdout: true).trim()
-                    if (!dockerPath) {
-                        error "Docker CLI not found on this node!"
-                    }
-                    sh 'docker --version'
-                }
+                sh 'which docker'
+                sh 'docker --version'
             }
         }
 
@@ -34,34 +29,32 @@ pipeline {
 
         stage('Docker Login & Push') {
             steps {
-                script {
-                    docker.withRegistry(DOCKER_REGISTRY, DOCKER_CREDENTIALS_ID) {
-                        sh "docker push ${DOCKER_IMAGE}"
-                    }
+                withCredentials([usernamePassword(credentialsId: '2c498829-1aa7-4c9f-802d-d9ffc999dd7f', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker push ${DOCKER_IMAGE}"
+                    sh 'docker logout'
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                script {
-                    def dockerPath = sh(script: 'which docker', returnStdout: true).trim()
-                    if (!dockerPath) {
-                        error "Docker CLI not found on this node at deploy stage!"
-                    }
-                    sh "docker run -d -p 5000:5000 ${DOCKER_IMAGE}"
-                }
+                echo 'Deploy stage — customize as needed'
+                // You can add your deployment steps here
             }
         }
     }
 
     post {
-        failure {
-            echo "Build failed!"
-        }
         success {
-            echo "Build succeeded!"
+            echo 'Pipeline completed successfully!'
         }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
+
     }
 }
 
